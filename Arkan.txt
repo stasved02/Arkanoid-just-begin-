@@ -1,0 +1,276 @@
+ public partial class FormPlay : Form
+    {
+        int rocketX, rocketY; // - Значения Х и У для ракетки
+        int MoveRocketX = 15;
+
+        int count = 0;
+        string numbers;
+
+        int borderLeftX, borderRightX, borderTopX; // - значения стенок
+
+        int ballX, ballY;
+        int ballMovingSpeedX = 7; // - Показатели местонахождения шарика, направление и его скорости, соответственно
+        int ballMovingSpeedY = 4;
+        int ballMovingX, ballMovingY;
+        int blocksNumber = 12;
+
+        public FormPlay()
+        {
+            InitializeComponent();
+        }
+
+        private void FormPlay_Shown(object sender, EventArgs e)
+        {
+            InitiateRocket();
+            timerBlock11.Enabled = true;
+            timerBlock12.Enabled = true;
+            numbers = count.ToString();
+            numbers = CountersNumber.Text;
+            borderLeftX = borderLeft.Location.X + borderLeft.Width;
+            borderRightX = borderRight.Location.X;
+            borderTopX = borderTop.Location.X + borderTop.Height;
+            ballX = Ball.Location.X;
+            ballY = Ball.Location.Y;
+            ballMovingX = ballMovingSpeedX;
+            ballMovingY = ballMovingSpeedY;
+            block11.Visible = true;
+            block12.Visible = false;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            MoveBall();
+        }
+
+        private void FormPlay_KeyDown(object sender, KeyEventArgs e)
+        {
+            Keys key = e.KeyCode;
+            switch (key)
+            {
+                case Keys.Left:
+                    moveRocket(-MoveRocketX);
+                    break;
+                case Keys.Right:
+                    moveRocket(MoveRocketX);
+                    break;
+                case Keys.Enter:
+                    timer1.Enabled = true;
+                    break;
+            }
+        }
+
+        private void moveRocket(int sX)
+        {
+            int x = rocketX + sX;
+            int x2 = x + rocket.Width;
+            if (borderLeftX > x) x = borderLeftX;
+            if (borderRightX < x2) x = borderRightX - rocket.Width;
+            rocketX = x;
+            rocket.Location = new Point(rocketX, rocketY);
+        }
+        private void InitiateRocket()
+        {
+            rocketX = rocket.Location.X;
+            rocketY = rocket.Location.Y;
+
+        }
+
+        private void BloksCount(Label block)
+        {
+                       
+            block.Visible = false;
+            blocksNumber--;
+                        
+
+            if (block == block11)
+            {
+                timerBlock11.Enabled = false;
+                block11.Visible = false;
+            }
+
+            if (block == block12)
+            {
+                timerBlock12.Enabled = false;
+                block12.Visible = false;
+            }
+
+            if (blocksNumber == 0)
+                GameWin();           
+
+        }
+
+        
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            block11.Visible = !block11.Visible;
+        }
+
+
+
+        private void timerBlock12_Tick(object sender, EventArgs e)
+        {
+            block12.Visible = !block12.Visible;
+        }
+
+
+
+        private void BlockBroke(Label block)
+        {
+            if (!block.Visible) return;
+            int bx1, bx0, bx2,
+                by1, by0, by2;
+
+            bx1 = ballX;
+            bx2 = ballX + Ball.Width;
+            bx0 = (bx1 + bx2) / 2;
+
+            by1 = ballY;
+            by2 = ballY + Ball.Height;
+            by0 = (by1 + by2) / 2;
+
+            int blX1, blX2,
+                blY1, blY2;
+
+            blX1 = block.Location.X;
+            blX2 = blX1 + block.Width;
+
+            blY1 = block.Location.Y;
+            blY2 = blY1 + block.Height;
+
+            if ((blX1 <= bx0 && bx0 <= blX2) && (blY1 <= by2 && by2 <= blY2))
+            {
+                BloksCount(block);
+                count++;
+                ballMovingY = -ballMovingY;
+
+                return;
+            }
+            if ((blX1 <= bx0 && bx0 <= blX2) && (blY1 <= by1 && by1 <= blY2))
+            {
+                BloksCount(block);
+                count++;
+                ballMovingY = -ballMovingY;
+
+                return;
+            }
+            if ((blX1 <= bx2 && bx2 <= blX2) && (blY1 <= by0 && by0 <= blY2))
+            {
+                BloksCount(block);
+                count++;
+                ballMovingX = -ballMovingX;
+
+                return;
+            }
+
+            if ((blX1 <= bx1 && bx1 <= blX2) && (blY1 <= by0 && by0 <= blY2))
+            {
+                BloksCount(block);
+                count++;
+                ballMovingX = -ballMovingX;
+
+
+                return;
+            }
+
+
+        }
+
+        private void GameOver()
+        {
+            timer1.Enabled = false;
+            MessageBox.Show("Вы проиграли!", "Игра окончена");
+            DialogResult = System.Windows.Forms.DialogResult.Abort;
+        }
+
+        private void GameWin()
+        {
+            timer1.Enabled = false;
+            MessageBox.Show("Вы выиграли! Переход на следующий уровень. Уровень сложности повышен!", "Победа");
+
+            startLevel2();
+
+        }
+
+        private void startLevel2()
+        {
+            Form2 play2 = new Form2();
+            play2.ShowDialog();
+        }
+
+
+
+        private void MoveBall()
+        {
+            int bx1, bx2,
+                by1, by2;
+
+            bx1 = ballX;
+            bx2 = bx1 + Ball.Width;
+
+            by1 = ballY;
+            by2 = by1 + Ball.Height;
+
+            if (bx1 + ballMovingX < borderLeftX) ballMovingX = ballMovingSpeedX;
+            if (bx2 + ballMovingX > borderRightX) ballMovingX = -ballMovingSpeedX;
+            if (by1 + ballMovingY < borderTopX) ballMovingY = ballMovingSpeedY;
+            if (by2 + ballMovingY > rocketY)
+            {
+                int bx0, by0;
+                bx0 = (bx1 + bx2) / 2;
+                by0 = (by1 + by2) / 2;
+
+                int rx1, rx2;
+                rx1 = rocketX;
+                rx2 = rocketX + rocket.Width;
+
+                if (rx1 <= bx0 && bx0 <= rx2)
+                    ballMovingY = -ballMovingSpeedY; // - отскок шарика от ракетки вверх
+                else
+                    if (rx1 <= bx2 + Ball.Width && bx2 + Ball.Width <= rx2)
+                {
+                    count++;
+                    ballMovingY = -ballMovingSpeedY;
+                    ballMovingX = -ballMovingSpeedX;
+                }
+                else if (rx1 <= bx1 - Ball.Width && bx1 - Ball.Width <= rx2)
+                {
+                    count++;
+                    ballMovingY = -ballMovingSpeedY;
+                    ballMovingX = ballMovingSpeedX;
+                }
+                else
+                    GameOver();
+            }
+
+            ballX += ballMovingX;
+            ballY += ballMovingY;
+            Ball.Location = new Point(ballX, ballY);
+            BlockBroke(block1);
+            count++;
+            BlockBroke(block2);
+            count++;
+            BlockBroke(block3);
+            count++;
+            BlockBroke(block4);
+            count++;
+            BlockBroke(block5);
+            count++;
+            BlockBroke(block6);
+            count++;
+            BlockBroke(block7);
+            count++;
+            BlockBroke(block8);
+            count++;
+            BlockBroke(block9);
+            count++;
+            BlockBroke(block10);
+            count++;
+            BlockBroke(block11);
+            count++;
+            BlockBroke(block12);
+            count++;
+        }
+
+    }
+}
